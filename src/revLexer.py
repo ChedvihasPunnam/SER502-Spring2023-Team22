@@ -1,7 +1,7 @@
 import sys
 def revlexer(input_file):
     #checking file extension
-    extension = input_file[-3:]
+    extension = input_file[-4:]
     if extension != '.rev':
         raise ValueError("Given file extension is not supported!")
 
