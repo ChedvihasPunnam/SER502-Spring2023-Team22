@@ -140,7 +140,6 @@ or(false, false, false).
 or(true, _, true).
 or(_, true, true).
 
-
 %====================-------------==================------------==========================-------------===================
 
 %search predicate find the respective values from the environment
@@ -186,3 +185,63 @@ exec_declare(parsed_declarebool(bool, G, true), Envrnmnt, NewEnvrnmnt):-
 exec_declare(parsed_declarebool(bool, G, false), Envrnmnt, NewEnvrnmnt):- 
     exec_chrctr_tree(G, Var_Id),
     modify(bool, Var_Id, false, Envrnmnt, NewEnvrnmnt).
+
+%Evaluating the various statements
+exec_stmnts(parsed_stmnts(C), Envrnmnt, Last_Envrnmnt) :- 
+    exec_declare(C, Envrnmnt, Last_Envrnmnt);
+    exec_assign(C, Envrnmnt, Last_Envrnmnt);
+    exec_boolean(C, Envrnmnt, Last_Envrnmnt, _New_Value);
+    exec_print(C, Envrnmnt, Last_Envrnmnt);
+    exec_if(C, Envrnmnt, Last_Envrnmnt);
+    exec_while(C, Envrnmnt, Last_Envrnmnt);
+    exec_forloop(C, Envrnmnt, Last_Envrnmnt);
+    exec_foreach(C, Envrnmnt, Last_Envrnmnt);
+    exec_ternary_op(C, Envrnmnt, Last_Envrnmnt);
+    exec_iter(C, Envrnmnt, Last_Envrnmnt).
+
+%Evaluating the assignment operation
+exec_assign(parsed_assign(C, G), Envrnmnt, NewEnvrnmnt) :- 
+    exec_expr(G, Envrnmnt, Envrnmnt1, New_Value),
+    type_check(New_Value, Ty),
+    exec_chrctr_tree(C, Var_Id),
+    search_type(Var_Id, Envrnmnt1, Ty1),
+    Ty =@= Ty1,
+    modify(Ty, Var_Id, New_Value, Envrnmnt1, NewEnvrnmnt).
+exec_assign(parsed_assign(C, G), Envrnmnt, NewEnvrnmnt) :- 
+    exec_str(G, Envrnmnt, Envrnmnt, New_Value),
+    type_check(New_Value, Ty),
+    exec_chrctr_tree(C, Var_Id),
+    search_type(Var_Id, Envrnmnt, Ty1),
+    Ty =@= Ty1,
+    modify(Ty, Var_Id, New_Value, Envrnmnt, NewEnvrnmnt).
+exec_assign(parsed_assign(C, G), Envrnmnt, NewEnvrnmnt) :- 
+   exec_boolean(G, Envrnmnt, Envrnmnt, New_Value),
+    type_check(New_Value, Ty),
+    exec_chrctr_tree(C, Var_Id),
+   search_type(Var_Id, Envrnmnt, Ty1),
+    Ty =@= Ty1,
+    modify(Ty, Var_Id, New_Value, Envrnmnt, NewEnvrnmnt).
+
+%Evaluating interpreted condition like boolean
+exec_boolean(true, _Envrnmnt1, _NewEnvrnmnt, true).
+exec_boolean(false, _Envrnmnt1, _NewEnvrnmnt,false).
+exec_boolean(parsed_bool_not(G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    (exec_boolean(G, Envrnmnt, NewEnvrnmnt, New_Value1);exec_interpreted_condtn(G, Envrnmnt, NewEnvrnmnt, New_Value1)), 
+    not(New_Value1, New_Value2), 
+    New_Value = New_Value2.
+exec_boolean(parsed_bool_and(C, G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_boolean(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_boolean(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    and(New_Value1, New_Value2, New_Value).
+exec_boolean(parsed_bool_and(C, G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_interpreted_condtn(G, Envrnmnt, NewEnvrnmnt, New_Value2), 
+    and(New_Value1, New_Value2, New_Value).
+exec_boolean(parsed_bool_or(C, G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_boolean(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_boolean(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    or(New_Value1, New_Value2, New_Value).
+exec_boolean(parsed_bool_or(C, G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_interpreted_condtn(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    or(New_Value1, New_Value2, New_Value).
