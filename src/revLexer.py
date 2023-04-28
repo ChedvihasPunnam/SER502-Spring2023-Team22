@@ -8,7 +8,7 @@ import tokenize
 def revlexer(input_file):
     #checking file extension
     extension = input_file[-4:]
-    if extension != 'GIAA':
+    if extension != '.rev':
         raise ValueError("Given file extension is not supported!")
     tokens_rev_list = []
     output = ''
