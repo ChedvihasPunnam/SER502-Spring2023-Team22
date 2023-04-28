@@ -139,3 +139,50 @@ and(_, false, false).
 or(false, false, false).
 or(true, _, true).
 or(_, true, true).
+
+
+%====================-------------==================------------==========================-------------===================
+
+%search predicate find the respective values from the environment
+
+search(Var_Id, [(_Dtype, Var_Id, Result)|_], Result).
+search(Var_Id, [_|Envrnmnt_Tail], Result) :- search(Var_Id, Envrnmnt_Tail, Result).
+
+search_type(Var_Id, [_|Envrnmnt_Tail], Result) :- search_type(Var_Id, Envrnmnt_Tail, Result).
+search_type(Var_Id, [(Dtype,Var_Id,_X)|_], Dtype).
+
+%modify predicate updates the value of the idntfr_name
+
+modify(Dtype, Var_Id, New_Value, [], [(Dtype, Var_Id, New_Value)]).
+modify(Dtype, Var_Id, New_Value, [(Dtype, Var_Id, _)|Envrnmnt_Tail], [(Dtype, Var_Id, New_Value)|Envrnmnt_Tail]).
+modify(Dtype, Var_Id, New_Value, [Curr|Envrnmnt_Tail], [Curr|Rem]) :- modify(Dtype, Var_Id, New_Value, Envrnmnt_Tail, Rem).
+
+%====================-------------==================------------==========================-------------===================
+
+%Evaluating the block of the code
+exec_codeblock(parsed_codeblock(C), Envrnmnt, Last_Envrnmnt) :- exec_codeblock_segment(C, Envrnmnt, Last_Envrnmnt).
+exec_codeblock_segment(parsed_codeblock(C, G), Envrnmnt, Last_Envrnmnt) :- exec_stmnts(C, Envrnmnt, Envrnmnt1), 
+    exec_codeblock_segment(G, Envrnmnt1, Last_Envrnmnt).
+exec_codeblock_segment(parsed_codeblock(C), Envrnmnt, Last_Envrnmnt) :- exec_stmnts(C, Envrnmnt, Last_Envrnmnt).
+
+%Evaluating the program
+exec_program(parsed_program(C), Last_Envrnmnt) :- exec_codeblock(C, [], Last_Envrnmnt), !.
+
+%Evaluating various kinds of the statements
+exec_declare(parsed_declare(C, G), Envrnmnt, NewEnvrnmnt):- 
+    exec_chrctr_tree(G, Var_Id),
+    modify(C, Var_Id, _, Envrnmnt, NewEnvrnmnt).
+exec_declare(parsed_int_declrtn(int, G, Z), Envrnmnt, NewEnvrnmnt):- 
+    exec_chrctr_tree(G, Var_Id),
+    exec_expr(Z, Envrnmnt, Envrnmnt1, New_Value),
+    modify(int, Var_Id, New_Value, Envrnmnt1, NewEnvrnmnt).
+exec_declare(parsed_str_declrtn(varchar, G, Z), Envrnmnt, NewEnvrnmnt):- 
+    exec_chrctr_tree(G, Var_Id),
+    exec_str(Z, Envrnmnt, NewEnvrnmnt1, New_Value),
+    modify(varchar, Var_Id, New_Value, NewEnvrnmnt1, NewEnvrnmnt).
+exec_declare(parsed_declarebool(bool, G, true), Envrnmnt, NewEnvrnmnt):- 
+    exec_chrctr_tree(G, Var_Id),
+    modify(bool, Var_Id, true, Envrnmnt, NewEnvrnmnt).
+exec_declare(parsed_declarebool(bool, G, false), Envrnmnt, NewEnvrnmnt):- 
+    exec_chrctr_tree(G, Var_Id),
+    modify(bool, Var_Id, false, Envrnmnt, NewEnvrnmnt).
