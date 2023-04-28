@@ -39,3 +39,39 @@ stmnts(parsed_stmnts(R)) --> exprssn(R), [;].
 stmnts(parsed_stmnts(R)) --> boolean(R), [;].
 stmnts(parsed_stmnts(R)) --> printstmnts(R), [;].
 
+%Parsing the declaration of the variable
+dclrtn(parsed_declare(R, L)) --> type(R), idntfr_name(L).
+dclrtn(parsed_str_declrtn(varchar, R, L)) --> ['varchar'], idntfr_name(R), ['='], string(L).
+dclrtn(parsed_declarebool(bool, R, true)) --> ['bool'], idntfr_name(R), [=], ['true'].
+dclrtn(parsed_int_declrtn(int, R, L)) --> ['int'], idntfr_name(R), ['='], exprssn(L).
+dclrtn(parsed_declarebool(bool, R, false)) --> ['bool'], idntfr_name(R), [=], ['false'].
+
+%Parsing the operator related to the assignment
+assgnmnt(parsed_assign(R, L)) --> idntfr_name(R), ['='], boolean(L).
+assgnmnt(parsed_assign(R, L)) --> idntfr_name(R), ['='], exprssn(L).
+
+%Parsing datatype
+type(varchar) --> ['varchar'].
+type(bool) --> ['bool'].
+type(int) --> ['int'].
+
+%Parsing information about the while loop
+while_loop_info(parsed_whileloop(A, B)) --> ['while'], ['('], (interpreted_condtn(A);boolean(A)), [')'], codeblock(B).
+
+%Parsing data about the for loop
+for_loop_info(parsed_for_loop_info(C, G, T, V)) --> ['for'], ['('], assgnmnt(C), [';'], (interpreted_condtn(G);boolean(G)), [';'], iterable_loop(T), [')'], codeblock(V).
+for_loop_info(parsed_for_loop_info(C, G, T, V)) --> ['for'], ['('], dclrtn(C), [';'], (interpreted_condtn(G);boolean(G)), [';'], iterable_loop(T), [')'], codeblock(V).
+for_loop_info(parsed_for_loop_info(C, G, T, V)) --> ['for'], ['('], dclrtn(C), [';'], (interpreted_condtn(G);boolean(G)), [';'], assgnmnt(T), [')'], codeblock(V).
+for_loop_info(parsed_for_loop_info(C, G, T, V)) --> ['for'], ['('], assgnmnt(C), [';'], (interpreted_condtn(G);boolean(G)), [';'], exprssn(T), [')'], codeblock(V).
+
+%Parsing the for each loop
+foreach(parsed_foreach(C, G, T, V)) --> ['for'], idntfr_name(C), ['in'], ['each'], ['('], num(G), [':'], num(T), [')'], codeblock(V).
+foreach(parsed_foreach(C, G, T, V)) --> ['for'], idntfr_name(C), ['in'], ['each'], ['('], num(G), [':'], idntfr_name(T), [')'], codeblock(V).
+foreach(parsed_foreach(C, G, T, V)) --> ['for'], idntfr_name(C), ['in'], ['each'], ['('], idntfr_name(G), [':'], num(T), [')'], codeblock(V).
+foreach(parsed_foreach(C, G, T, V)) --> ['for'], idntfr_name(C), ['in'], ['each'], ['('], idntfr_name(G), [':'], idntfr_name(T), [')'], codeblock(V).
+
+%Parsing the if condition
+if_cndtn(parsed_if_cond(C, G, T)) --> ['if'], ['('], (interpreted_condtn(C);boolean(C)), [')'], codeblock(G), ['else'], codeblock(T).
+if_cndtn(parsed_if_cond(C, G)) --> ['if'], ['('], (interpreted_condtn(C);boolean(C)), [')'], codeblock(G).
+
+
