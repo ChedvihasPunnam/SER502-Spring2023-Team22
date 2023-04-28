@@ -284,3 +284,95 @@ exec_while(parsed_whileloop(C,G), Envrnmnt,Last_Envrnmnt):-
     exec_while(parsed_whileloop(C,G), NewEnvrnmnt1,Last_Envrnmnt).
 exec_while(parsed_whileloop(C,_Y), Envrnmnt, Envrnmnt) :- 
     exec_interpreted_condtn(C, Envrnmnt, Envrnmnt,false).
+
+%Executing interpreted_condtnal operation
+exec_interpreted_condtn(parsed_interpreted_condtn(C, ==, G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_expr(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    (( New_Value1 =:= New_Value2, New_Value = true); ( \+(New_Value1 =:= New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C, '!=', G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_expr(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    (( New_Value1 =\= New_Value2, New_Value = true);( \+(New_Value1 =\= New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C, '>', G), Envrnmnt, NewEnvrnmnt, New_Value) :-
+    exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_expr(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    (( New_Value1 > New_Value2, New_Value = true);( \+(New_Value1 > New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C, '<', G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_expr(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    (( New_Value1 < New_Value2, New_Value = true);( \+(New_Value1 < New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C, '>=', G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_expr(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    (( New_Value1 >= New_Value2, New_Value = true);( \+(New_Value1 >= New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C, '<=', G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_expr(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    (( New_Value1 =< New_Value2, New_Value = true);( \+(New_Value1 =< New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C, ==, G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_str(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_str(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    ((New_Value1 = New_Value2, New_Value = true);(\+(New_Value1 = New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'!=',G), Envrnmnt, NewEnvrnmnt, New_Value) :-
+    exec_str(C, Envrnmnt, NewEnvrnmnt, New_Value1),
+    exec_str(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    ((New_Value1 = New_Value2, New_Value = false);(\+(New_Value1 = New_Value2), New_Value = true)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'>',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_str(C, Envrnmnt, NewEnvrnmnt,_New_Value1),
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'<',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_str(C, Envrnmnt, NewEnvrnmnt,_New_Value1),
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'>=',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_str(C, Envrnmnt, NewEnvrnmnt,_New_Value1),
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'<=',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_str(C, Envrnmnt, NewEnvrnmnt,_New_Value1),
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
+exec_interpreted_condtn(parsed_interpreted_condtn(C,==,G), Envrnmnt, NewEnvrnmnt, New_Value) :-
+    exec_chrctr_tree(C,Var_Id),
+    search(Var_Id, Envrnmnt, New_Value1),
+    type_check(New_Value1,Ty),
+    Ty=varchar,
+    exec_str(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    ((New_Value1 =@= New_Value2, New_Value = true);(\+(New_Value1 =@= New_Value2), New_Value = false)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'!=',G), Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search(Var_Id, Envrnmnt, New_Value1),
+    type_check(New_Value1,Ty),
+    Ty=varchar,
+    exec_str(G, Envrnmnt, NewEnvrnmnt, New_Value2),
+    ((New_Value1 = New_Value2, New_Value = false);(\+(New_Value1 = New_Value2), New_Value = true)).
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'>',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search(Var_Id, Envrnmnt, New_Value1),
+    type_check(New_Value1,Ty),
+    Ty=varchar,
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'<',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search(Var_Id, Envrnmnt, New_Value1),
+    type_check(New_Value1,Ty),
+    Ty=varchar,
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'>=',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search(Var_Id, Envrnmnt, New_Value1),
+    type_check(New_Value1,Ty),
+    Ty=varchar,
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
+exec_interpreted_condtn(parsed_interpreted_condtn(C,'<=',G), Envrnmnt, NewEnvrnmnt,_New_Value) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search(Var_Id, Envrnmnt, New_Value1),
+    type_check(New_Value1,Ty),
+    Ty=varchar,
+    exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
+    write("Operation is incorrect!").
