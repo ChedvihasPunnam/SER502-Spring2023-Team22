@@ -114,3 +114,28 @@ term(parsed_divsn(C, G)) --> term(C), ['/'], term(G).
 term(C) --> ['('], exprssn(C), [')'].
 term(C) --> num(C).
 term(C) --> idntfr_name(C).
+
+%Parsing operations of unary decrement---increment
+iterable_loop(parsed_decrmnt(C)) --> idntfr_name(C), ['-'], ['-'].
+iterable_loop(parsed_incrmnt(C)) --> idntfr_name(C), ['+'], ['+'] .
+
+%Parsing string, number and identifier name
+idntfr_name(idntfr_name(G)) --> [G], {atom(G)}.
+num(parsed_num(G)) --> [G], {number(G)}.
+onlystring(parsed_str(G)) --> [G], {atom(G)}.
+string(G) --> onlystring(G).
+
+type_check(New_Value, Result) :- (New_Value = true ; New_Value = false), Result = bool.
+type_check(New_Value, Result) :- string(New_Value), Result = varchar.
+type_check(New_Value, Result) :- integer(New_Value), Result = int.
+
+not(false, true).
+not(true, false).
+
+and(true, true, true).
+and(false, _, false).
+and(_, false, false).
+
+or(false, false, false).
+or(true, _, true).
+or(_, true, true).
