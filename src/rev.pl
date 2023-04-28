@@ -425,3 +425,61 @@ traversing(C,T,W, Envrnmnt,Last_Envrnmnt):-
 traversing(C,T,_W, Envrnmnt, Envrnmnt) :- 
     search(C, Envrnmnt, New_Value), 
     New_Value >= T.
+
+%Evaluating the operations increment and decrement
+exec_iter(parsed_incrmnt(C), Envrnmnt, NewEnvrnmnt) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search_type(Var_Id, Envrnmnt,int),
+    search(Var_Id, Envrnmnt, New_Value),
+    New_Value1 is New_Value + 1, 
+    modify(int,Var_Id, New_Value1, Envrnmnt, NewEnvrnmnt).
+exec_iter(parsed_decrmnt(C), Envrnmnt, NewEnvrnmnt) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search_type(Var_Id, Envrnmnt,int),
+    search(Var_Id, Envrnmnt, New_Value),
+    New_Value1 is New_Value - 1, 
+    modify(int,Var_Id, New_Value1, Envrnmnt, NewEnvrnmnt).
+
+%Evaluating the string and the number
+exec_num(parsed_num(New_Value), Envrnmnt, Envrnmnt, New_Value).
+exec_num(idntfr_name(K), Envrnmnt, Envrnmnt, New_Value) :-
+    term_to_atom(Var_Id,K),
+    search(Var_Id, Envrnmnt, New_Value).
+exec_numtree(parsed_num(New_Value), New_Value).
+exec_chrctr_tree(idntfr_name(K),Var_Id):- 
+    term_to_atom(Var_Id,K).
+exec_str(parsed_str(K), Envrnmnt, Envrnmnt, New_Value) :- 
+    atom_string(K, New_Value).
+
+%Evaluating mathematical operations like addition -- subtraction -- multiplication -- division
+exec_expr(C, Envrnmnt, NewEnvrnmnt) :- 
+    exec_assign(C, Envrnmnt, NewEnvrnmnt).
+exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_term(C, Envrnmnt, NewEnvrnmnt, New_Value).
+exec_expr(parsed_subtrn(C,G), Envrnmnt, NewEnvrnmnt, New_Value):-
+    exec_expr(C, Envrnmnt, Envrnmnt1, New_Value1),
+    exec_term(G, Envrnmnt1, NewEnvrnmnt, New_Value2),
+    New_Value is New_Value1 - New_Value2.
+exec_term(C, Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_term1(C, Envrnmnt, NewEnvrnmnt, New_Value).
+exec_term(parsed_addtn(C,G), Envrnmnt, NewEnvrnmnt, New_Value):-
+    exec_term(C, Envrnmnt, Envrnmnt1, New_Value1),
+    exec_term1(G, Envrnmnt1, NewEnvrnmnt, New_Value2),
+    New_Value is New_Value1 + New_Value2.
+exec_term1(C, Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_term2(C, Envrnmnt, NewEnvrnmnt, New_Value).
+exec_term1(parsed_multpcn(C,G), Envrnmnt, NewEnvrnmnt, New_Value):-
+    exec_term1(C, Envrnmnt, Envrnmnt1, New_Value1),
+    exec_term2(G, Envrnmnt1, NewEnvrnmnt, New_Value2),
+    New_Value is New_Value1 * New_Value2.
+exec_term2(C, Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_term3(C, Envrnmnt, NewEnvrnmnt, New_Value).
+exec_term2(parsed_divsn(C,G),  Envrnmnt, NewEnvrnmnt, New_Value):-
+    exec_term2(C, Envrnmnt, Envrnmnt1, New_Value1), 
+    exec_term3(G, Envrnmnt1, NewEnvrnmnt, New_Value2),
+    New_Value is floor(New_Value1 / New_Value2).
+exec_term3(C,  Envrnmnt, NewEnvrnmnt, New_Value) :- 
+    exec_num(C, Envrnmnt, NewEnvrnmnt, New_Value).
+exec_term3(parsed_braces(C), Envrnmnt, NewEnvrnmnt, New_Value):-
+    exec_expr(C, Envrnmnt, NewEnvrnmnt, New_Value).
+    
