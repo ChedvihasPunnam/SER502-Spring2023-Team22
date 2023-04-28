@@ -376,3 +376,52 @@ exec_interpreted_condtn(parsed_interpreted_condtn(C,'<=',G), Envrnmnt, NewEnvrnm
     Ty=varchar,
     exec_str(G, Envrnmnt, NewEnvrnmnt,_New_Value2),
     write("Operation is incorrect!").
+    
+%Evaluating the information about for loop
+exec_forloop(parsed_for_loop_info(C,G,Z,W), Envrnmnt,Last_Envrnmnt):- 
+    exec_declare(C, Envrnmnt, NewEnvrnmnt),
+    loopBody(G,Z,W, NewEnvrnmnt,Last_Envrnmnt).
+exec_forloop(parsed_for_loop_info(C,G,Z,W), Envrnmnt,Last_Envrnmnt):- 
+    exec_assign(C, Envrnmnt, NewEnvrnmnt),
+    loopBody(G,Z,W, NewEnvrnmnt,Last_Envrnmnt).
+loopBody(C,G,Z, Envrnmnt,Last_Envrnmnt) :- 
+    exec_interpreted_condtn(C, Envrnmnt, Envrnmnt,true),
+    exec_codeblock(Z, Envrnmnt, NewEnvrnmnt),
+    (exec_iter(G, NewEnvrnmnt, NewEnvrnmnt1);exec_expr(G, NewEnvrnmnt, NewEnvrnmnt1)),
+    loopBody(C,G,Z, NewEnvrnmnt1,Last_Envrnmnt).
+loopBody(C,_Y,_Z, Envrnmnt, Envrnmnt) :- 
+    exec_interpreted_condtn(C, Envrnmnt, Envrnmnt,false).
+loopBody(C,G,Z, Envrnmnt,Last_Envrnmnt) :- 
+    exec_boolean(C, Envrnmnt, Envrnmnt,true),
+    exec_codeblock(Z, Envrnmnt, NewEnvrnmnt),
+    (exec_iter(G, NewEnvrnmnt, NewEnvrnmnt1);exec_expr(G, NewEnvrnmnt, NewEnvrnmnt1)),
+    loopBody(C,G,Z, NewEnvrnmnt1,Last_Envrnmnt).
+loopBody(C,_Y,_Z, Envrnmnt, Envrnmnt) :- 
+    exec_boolean(C, Envrnmnt, Envrnmnt,false).
+
+%Evaluating ternary intrepreted condition
+exec_ternary_op(parsed_tern_cond(C,G,_Z), Envrnmnt,Last_Envrnmnt):- 
+    (exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt,true);exec_boolean(C, Envrnmnt, NewEnvrnmnt,true)),
+    exec_stmnts(G, NewEnvrnmnt,Last_Envrnmnt).
+exec_ternary_op(parsed_tern_cond(C,_Y,Z), Envrnmnt,Last_Envrnmnt):- 
+    (exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt,false);exec_boolean(C, Envrnmnt, NewEnvrnmnt,false)),
+    exec_stmnts(Z, NewEnvrnmnt,Last_Envrnmnt).
+
+%Evaluating the foreach
+exec_foreach(parsed_foreach(C,G,T,W), Envrnmnt,Last_Envrnmnt):- 
+    exec_chrctr_tree(C,Var_Id),
+    ((exec_numtree(G, New_Value),modify(int,Var_Id, New_Value, Envrnmnt, NewEnvrnmnt));
+    (search(G, Envrnmnt, New_Value),modify(int,Var_Id, New_Value, Envrnmnt, NewEnvrnmnt))),
+    ((exec_numtree(T,N));
+    (exec_chrctr_tree(T,Var_Id1),search(Var_Id1, NewEnvrnmnt,N))),
+    traversing(Var_Id,N,W, NewEnvrnmnt,Last_Envrnmnt).
+traversing(C,T,W, Envrnmnt,Last_Envrnmnt):- 
+    search(C, Envrnmnt, New_Value),
+    New_Value < T, 
+    exec_codeblock(W, Envrnmnt, NewEnvrnmnt),
+    New_Value1 is New_Value + 1,
+    modify(int, C, New_Value1, NewEnvrnmnt, NewEnvrnmnt1),
+    traversing(C,T,W, NewEnvrnmnt1,Last_Envrnmnt).
+traversing(C,T,_W, Envrnmnt, Envrnmnt) :- 
+    search(C, Envrnmnt, New_Value), 
+    New_Value >= T.
