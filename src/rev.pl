@@ -245,3 +245,42 @@ exec_boolean(parsed_bool_or(C, G), Envrnmnt, NewEnvrnmnt, New_Value) :-
     exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt, New_Value1),
     exec_interpreted_condtn(G, Envrnmnt, NewEnvrnmnt, New_Value2),
     or(New_Value1, New_Value2, New_Value).
+
+%Evaluating the interpreted condtion if
+exec_if(parsed_if_cond(C,G), Envrnmnt,Last_Envrnmnt):- 
+    ((exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt,true);exec_boolean(C, Envrnmnt, NewEnvrnmnt,true)),exec_codeblock(G, NewEnvrnmnt,Last_Envrnmnt)).
+exec_if(parsed_if_cond(C,_Y), Envrnmnt, NewEnvrnmnt):- 
+    exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt,false);exec_boolean(C, Envrnmnt, NewEnvrnmnt,false).
+exec_if(parsed_if_cond(C,G,_Z), Envrnmnt,Last_Envrnmnt):- 
+    (exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt,true);exec_boolean(C, Envrnmnt, NewEnvrnmnt,true)),
+    exec_codeblock(G, NewEnvrnmnt,Last_Envrnmnt).
+exec_if(parsed_if_cond(C,_Y,Z), Envrnmnt,Last_Envrnmnt):- 
+    (exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt,false);exec_boolean(C, Envrnmnt, NewEnvrnmnt,false)),
+    exec_codeblock(Z, NewEnvrnmnt,Last_Envrnmnt).
+
+
+%Evaluating the print statements
+exec_print(parsed_print(C), Envrnmnt, Envrnmnt) :- 
+    exec_chrctr_tree(C,Var_Id),
+    search(Var_Id, Envrnmnt, New_Value),
+    writeln(New_Value).
+exec_print(parsed_print(C), Envrnmnt, Envrnmnt) :- 
+    exec_numtree(C, New_Value),
+    writeln(New_Value).
+exec_print(parsed_print(C), Envrnmnt, Envrnmnt) :- 
+    exec_str(C, Envrnmnt, Envrnmnt, New_Value),
+    writeln(New_Value).
+
+%Evaluating the data about while loop
+exec_while(parsed_whileloop(C,G), Envrnmnt,Last_Envrnmnt):- 
+    exec_boolean(C, Envrnmnt, NewEnvrnmnt,true),
+    exec_codeblock(G, NewEnvrnmnt, NewEnvrnmnt1),
+    exec_while(parsed_whileloop(C,G), NewEnvrnmnt1,Last_Envrnmnt).
+exec_while(parsed_whileloop(C,_Y), Envrnmnt, Envrnmnt) :- 
+    exec_boolean(C, Envrnmnt, Envrnmnt,false).
+exec_while(parsed_whileloop(C,G), Envrnmnt,Last_Envrnmnt):- 
+    exec_interpreted_condtn(C, Envrnmnt, NewEnvrnmnt,true),
+    exec_codeblock(G, NewEnvrnmnt, NewEnvrnmnt1),
+    exec_while(parsed_whileloop(C,G), NewEnvrnmnt1,Last_Envrnmnt).
+exec_while(parsed_whileloop(C,_Y), Envrnmnt, Envrnmnt) :- 
+    exec_interpreted_condtn(C, Envrnmnt, Envrnmnt,false).
