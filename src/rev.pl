@@ -74,4 +74,43 @@ foreach(parsed_foreach(C, G, T, V)) --> ['for'], idntfr_name(C), ['in'], ['each'
 if_cndtn(parsed_if_cond(C, G, T)) --> ['if'], ['('], (interpreted_condtn(C);boolean(C)), [')'], codeblock(G), ['else'], codeblock(T).
 if_cndtn(parsed_if_cond(C, G)) --> ['if'], ['('], (interpreted_condtn(C);boolean(C)), [')'], codeblock(G).
 
+%Parsing ternary operator condition
+ternary_cndtn(parsed_tern_cond(C, G, T)) --> (interpreted_condtn(C);boolean(C)), ['?'], stmnts(G), [':'], stmnts(T).
 
+%Parsing the expression related to boolean variables
+boolean(true) --> ['true'].
+boolean(false) --> ['false'].
+boolean(parsed_bool_not(R)) --> ['not'],['('], boolean(R), [')'].
+boolean(parsed_bool_not(R)) --> ['not'],['('], interpreted_condtn(R), [')'].
+boolean(parsed_bool_and(R, L)) --> boolean(R), ['and'], boolean(L).
+boolean(parsed_bool_and(R, L)) --> interpreted_condtn(R), ['and'], interpreted_condtn(L).
+boolean(parsed_bool_or(R, L)) --> boolean(R), ['or'], boolean(L).
+boolean(parsed_bool_or(R, L)) --> interpreted_condtn(R), ['or'], interpreted_condtn(L).
+
+%Parsing print related statements 
+printstmnts(parsed_print(R)) --> ['print'], idntfr_name(R).
+printstmnts(parsed_print(R)) --> ['print'], num(R).
+printstmnts(parsed_print(R)) --> ['print'], string(R).
+
+%Parsing the interpreted condition
+interpreted_condtn(parsed_interpreted_condtn(R, L, Z)) --> exprssn(R), opratr_token(L), exprssn(Z).
+interpreted_condtn(parsed_interpreted_condtn(R, L, Z)) --> string(R), opratr_token(L), string(Z).
+interpreted_condtn(parsed_interpreted_condtn(R, L, Z)) --> idntfr_name(R), opratr_token(L), string(Z).
+
+%Parsing the interpreted condition for operator token
+opratr_token('!=') --> ['!='].
+opratr_token(==) --> ['=='].
+opratr_token(<) --> ['<'].
+opratr_token(>) --> ['>'].
+opratr_token(<=) --> ['<='].
+opratr_token(>=) --> ['>='].
+
+%Parsing operations like multiplication--addition--division--subtraction
+exprssn(parsed_addtn(C, G)) --> exprssn(C), ['+'], term(G).
+exprssn(parsed_subtrn(C, G)) --> exprssn(C), ['-'], term(G).
+exprssn(C) --> term(C).
+term(parsed_multpcn(C, G)) --> term(C), ['*'], term(G).
+term(parsed_divsn(C, G)) --> term(C), ['/'], term(G).
+term(C) --> ['('], exprssn(C), [')'].
+term(C) --> num(C).
+term(C) --> idntfr_name(C).
