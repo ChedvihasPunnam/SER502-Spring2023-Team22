@@ -13,8 +13,12 @@
 - Clone this github repository into your machine.
 - Install the above mentioned tools(Python and SWI-Prolog)
 - Now open command prompt in the folder "SER502-Spring2023-Team22"
-- Now execute the below command to 
-```swipl
+- Now execute the below command:
+
+
+```
+swipl
+
 ```
 - Now give the path to the .pl file for compilation:
 ```
