@@ -1,0 +1,9 @@
+init
+{
+  int r=10;
+  varchar tern='Output using Ternary operator:';
+  r>=5? r=r*2; : r=r/2;;
+  print tern;
+  print r;
+}
+exit
