@@ -1,0 +1,9 @@
+init
+{
+for (int r=10;r<=100;r=r+10)
+{
+print r;
+}
+
+}
+exit
