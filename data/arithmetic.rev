@@ -1,0 +1,25 @@
+init
+{
+int a=2;
+int b=5;
+int sum;
+int sub;
+int mul;
+int div;
+
+
+sum=a+b;
+print sum;
+
+sub=a-b;
+print sub;
+
+mul=a*b;
+print mul;
+
+div=b/a;
+print div;
+
+
+}
+exit
