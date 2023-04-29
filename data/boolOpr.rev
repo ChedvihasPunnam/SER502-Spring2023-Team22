@@ -1,0 +1,33 @@
+init
+{
+int r=1;
+int e=5;
+int v=8;
+
+if(r>e and e<v)
+{
+  print r;
+  
+}
+else
+{
+ print e;
+
+}
+  
+if(r>e or e<v)
+{
+print r;
+}
+else
+{
+print e;
+}
+
+if(r!=e)
+{
+print v;
+}
+
+}
+exit
