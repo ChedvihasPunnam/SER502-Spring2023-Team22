@@ -1,0 +1,16 @@
+init
+{
+int roomNumber=158;
+varchar aptname=rev;
+varchar aprt=apartments;
+varchar prog= '==Displaying string assignment and printing it==';
+varchar addr='Address:';
+
+print prog;
+print addr;
+print roomNumber;
+print aptname;
+print aprt;
+
+}
+exit
