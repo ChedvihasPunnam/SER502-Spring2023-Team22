@@ -1,0 +1,13 @@
+init
+{
+int a=158;
+varchar b='one fifty eight';
+bool c=false;
+
+print a;
+print b;
+print c;
+
+
+}
+exit
