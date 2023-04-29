@@ -1,0 +1,10 @@
+init 
+{
+ int r=5;
+ for x in each(1:10)
+ {
+	x=x+r;
+ }
+ print x;
+}
+exit
