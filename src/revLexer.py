@@ -1,7 +1,5 @@
 import sys
-from functools import reduce
-from tokenize import tokenize, untokenize, NUMBER, STRING, NAME, OP
-import re
+from tokenize import tokenize
 import io
 import tokenize
 
