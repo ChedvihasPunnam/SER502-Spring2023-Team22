@@ -1,0 +1,13 @@
+init
+{
+int r=5;
+int count=0;
+while(r<=30)
+{
+ r=r+1;
+ count=count+1;
+}
+
+print count;
+}
+exit
